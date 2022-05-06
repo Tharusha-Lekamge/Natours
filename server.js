@@ -22,6 +22,7 @@ mongoose
     useNewUrlParser: true,
     useFindAndModify: false,
     useCreateIndex: true,
+    useUnifiedTopology: true,
   })
   .then(() => {
     // eslint-disable-next-line no-console
@@ -29,27 +30,6 @@ mongoose
     // eslint-disable-next-line no-console
     console.log('DB connection set');
   });
-
-// mongoose01 - creating schema
-// a field can have a set of attributes
-// can pass an error msg as given in required: [true, 'Tour must have a Name']
-const tourSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Tour must have a Name'],
-    unique: true,
-  },
-  rating: Number,
-  price: {
-    type: Number,
-    required: true,
-  },
-});
-
-// Mongoose02 - Creating the model
-const Tour = mongoose.model('Tour', tourSchema);
-
-// Mongoose03 - Creating documents
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console
