@@ -104,3 +104,46 @@ exports.deleteTour = async (req, res) => {
     });
   }
 };
+
+// Aggregate pipeline - UNWIND, PROJECTION
+exports.getMonthlyPlan = async(req, res)=>{
+  try{
+    const year = req.params.year*1;
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates'
+      },
+      {
+        $match:{
+          startDates:{
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          }
+        }
+      },
+      {
+        $group: {
+          // Group by the month in start Date
+          _id:{$month:'$startDates'},
+          numTours: {$sum: 1},
+          tours:{$push: '$name'}       
+        }
+      },
+      {
+        $addFields:{month:'$_id'}
+      },
+      {
+        $project:{
+          _id:0
+        }
+      }
+    ])
+  }catch (err) {
+    res.status(400).json({
+      status: 'failed',
+      data: {
+        err,
+      },
+    });
+  }
+}
