@@ -13,12 +13,11 @@ const tourSchema = new mongoose.Schema({
   rating: Number,
   price: {
     type: Number,
-    required: true,
+    required: false,
   },
   // TO specify that we need virtual properties
   // to appear in the schema
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true },
+
   slug: {
     type: String,
   },
@@ -51,6 +50,7 @@ tourSchema.pre('save', function (next) {
 
 // QUERY MIDDLEWARE
 tourSchema.pre('query', function (next) {
+  // eslint-disable-next-line no-console
   console.log(this);
   this.find({ secretTour: { $ne: true } });
   // This is the query object. Not a document
@@ -65,6 +65,7 @@ tourSchema.pre('aggregate', function (next) {
     },
   });
   // Unshift adds to the beginnning of the array
+  // eslint-disable-next-line no-console
   console.log(this.pipeline());
   // 'this' is an aggregate object
   next();
