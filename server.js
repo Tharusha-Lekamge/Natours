@@ -7,6 +7,14 @@ const dotenv = require('dotenv');
 // Get the app.js file to the server
 const app = require('./app');
 
+// unhandled exceptions
+process.on('unhandledException', (err) => {
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+
+  process.exit(1);
+});
+
 dotenv.config({ path: './config.env' });
 
 // get the port from dotenv
