@@ -19,9 +19,27 @@ const sendErrorProd = (err, res) => {
     message: err.message,
   });
 };
+const handleDuplicateFieldsDB = (err) => {
+  // Regular expression to find text enclosed with "" or ''
+  // This returns an array of all text enclosed by those.
+  // Take the first element of the returned array
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  const message = `Duplicate field value ${value}. Please use another Value`;
+  // 400 is bad request code
+  return new AppError(message, 400);
+};
 
 const handleCastErrorDB = (err) => {
   const message = `invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
+
+const handleValidationErrorDB = (err) => {
+  // To create an array of all the errors present in the
+  // err object by iterating through them
+  // Get the error element and store the error msg to the array
+  const errors = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid Input Data ${errors.join('.\n')}`;
   return new AppError(message, 400);
 };
 
@@ -39,6 +57,11 @@ module.exports = (err, req, res, next) => {
 
     // castErrors
     if (err.name === 'CastError') error = handleCastErrorDB(error);
+
+    if (err.name === 11000) error = handleDuplicateFieldsDB(error);
+
+    if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
+
     // Send generic message
     sendErrorProd(error, res);
   }
