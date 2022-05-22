@@ -1,12 +1,17 @@
-//const express = require('express');
+// const express = require('express');
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 // controller fucntions
 // wait for the promise
-exports.createTour = catchAsync(async (req, res) => {
+exports.createTour = catchAsync(async (req, res, next) => {
   const newTour = await Tour.create(req.body);
 
+  // Add an error if there is no tour returned
+  if (!newTour) {
+    return next(new AppError('No tour with this ID', 404));
+  }
   res.status(201).json({
     status: 'success',
     data: {
@@ -15,7 +20,7 @@ exports.createTour = catchAsync(async (req, res) => {
   });
 });
 
-exports.getAllTours = catchAsync(async (req, res) => {
+exports.getAllTours = catchAsync(async (req, res, next) => {
   const allTours = await Tour.find();
 
   res.status(200).json({
@@ -28,7 +33,7 @@ exports.getAllTours = catchAsync(async (req, res) => {
 });
 
 // ID of the tour passed in the url params
-exports.getTour = catchAsync(async (req, res) => {
+exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
 
   res.status(200).json({
@@ -41,7 +46,7 @@ exports.getTour = catchAsync(async (req, res) => {
 
 // new: true defines that the return query object should be the updated tour
 // runValidators is a mongoose validator checking incoming json in req.body
-exports.updateTour = catchAsync(async (req, res) => {
+exports.updateTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
@@ -54,7 +59,7 @@ exports.updateTour = catchAsync(async (req, res) => {
   });
 });
 
-exports.deleteTour = catchAsync(async (req, res) => {
+exports.deleteTour = catchAsync(async (req, res, next) => {
   await Tour.findByIdAndDelete(req.params.id);
   res.status(204).json({
     status: 'Success',
@@ -62,7 +67,7 @@ exports.deleteTour = catchAsync(async (req, res) => {
 });
 
 // Aggregate pipeline - UNWIND, PROJECTION
-exports.getMonthlyPlan = catchAsync(async (req, res) => {
+exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
   const year = req.params.year * 1;
   const plan = await Tour.aggregate([
     {
@@ -93,4 +98,7 @@ exports.getMonthlyPlan = catchAsync(async (req, res) => {
       },
     },
   ]);
+  res.status(200).json({
+    plan: plan,
+  });
 });
