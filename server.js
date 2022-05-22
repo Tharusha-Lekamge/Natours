@@ -31,7 +31,22 @@ mongoose
     console.log('DB connection set');
   });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`listening on port ${port}`);
+});
+
+// Handling unhandled rejections
+process.on('unhandledRejection', (err) => {
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+  // As the node application cannot run anymore due to unhandled exception,
+  // exit the application. exit() method shuts down all pending requests.
+  // Therefore it is not a good idea to use this in here
+  // process.exit(1);
+
+  // This is much better
+  server.close(() => {
+    process.exit(1);
+  });
 });
